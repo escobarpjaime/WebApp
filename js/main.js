@@ -26,6 +26,7 @@ class AppObject{
 	
 	addElement(element, name){
 		element.classList.add("app-element");
+        element.appParent = this;
 		this.elementList.push(element);
 		this.elements[name] = element;
 	}
@@ -38,6 +39,7 @@ class Window extends AppObject{
 		if(title != undefined){
 			this.title = title;
 		}
+		this.draggin = false;
 		this.timeuot = 0;
 		this.addElement(document.createElement("div"), "window");
 		this.addElement(document.createElement("div"), "title");
@@ -50,17 +52,47 @@ class Window extends AppObject{
 		this.elements.window.appendChild(this.elements.title);
 		this.elements.window.appendChild(this.elements.content);
 		
-		this.alpha = 0.7;
+		this.alpha = 1;
 		
 		this.elements.window.style.top = "50px";
-		this.elements.window.style.backgroundColor = "rgba(5,2,7," + this.alpha + ")";
+		this.elements.window.style.left = "50px";
+        this.elements.window.style.opacity = this.alpha;
 		console.log(this.elements.window.style.backgroundColor);
-		this.elements.title.style.backgroundColor = "rgba(5,2,7," + this.alpha + ")";
-		this.elements.content.style.backgroundColor = "rgba(5,2,7," + this.alpha+ ")";
 		this.elements.title.innerText = this.title;
 		
+        this.elements.title.addEventListener("mousedown", function(){ this.appParent.dragStart();});
+        this.elements.title.addEventListener("mouseup", function(){ this.appParent.dragStop();});
+		window.addEventListener("mousemove", function(e){
+			if(window.dragginObject != undefined){
+				window.dragginObject.dragMoving(e);
+			}
+		});
+
 		this.mainElement = this.elements.window;
 	}
+	
+	dragStart(){
+		this.draggin = true;
+		window.dragginObject = this;
+		this.elements.window.style.opacity = "0.7";
+	}
+	
+	dragStop(){
+		this.draggin = false;
+		this.elements.window.style.opacity = this.alpha;
+	}
+	
+	dragMoving(e){
+		if(this.draggin == true){
+			var x = parseInt(this.elements.window.style.left);
+			var y = parseInt(this.elements.window.style.top);
+			this.elements.window.style.left = (x + e.movementX) + "px";
+			this.elements.window.style.top = (y + e.movementY) + "px";
+			e.stopPropagation();
+		}
+	}
+	
+	
 }
 
 
